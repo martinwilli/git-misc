@@ -1,0 +1,15 @@
+#!/bin/bash
+
+MOVE_DETECT="-C"
+SRCDIR="."
+if [ "$#" -gt "0" ]
+then
+	SRCDIR="$1"
+fi
+
+git ls-files -z "$SRCDIR" \
+	| parallel -t --null --max-args 1 "git blame -ef $MOVE_DETECT -- " \
+	| awk '{print $3}' \
+	| sort \
+	| uniq -c \
+	| sort -n
