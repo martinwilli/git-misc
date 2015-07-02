@@ -1,0 +1,13 @@
+#!/bin/bash
+
+RECENT=$(git reflog | grep "moving from .* to" | awk '{print $(NF)}' | awk ' !x[$0]++')
+BRANCHES=$(git branch | awk '{print $(NF)}')
+
+for BRANCH in $RECENT
+do
+	if echo "$BRANCHES" | grep -q "^$BRANCH\$"
+	then
+		LASTCOMMIT=$(git show -s --format="%cr" "$BRANCH")
+		printf "%-30s %s\n" "$BRANCH" "$LASTCOMMIT"
+	fi
+done
