@@ -1,0 +1,35 @@
+#!/bin/bash
+
+TAGMATCH="^[0-9]"
+TAGNOMATCH="dr\|rc"
+RELS="$(git tag | grep $TAGMATCH | grep -v $TAGNOMATCH | sort -V) HEAD"
+TOTAL=0
+
+echo "Release    Cmts   Date        Days"
+echo "----------------------------------"
+
+for REL in $RELS
+do
+	DATE=$(git log --format=format:%ci -1 $REL)
+	if [ -n "$PREV" ];
+	then
+		COUNT=$(git log --oneline $PREV..$REL | wc -l)
+		DAYS=$((($(date -d "$DATE" "+%s") - $(date -d "$PREVDATE" "+%s")) / 86400))
+	else
+		COUNT=$(git log --oneline $REL | wc -l)
+		DAYS=""
+	fi
+	PREV=$REL
+	PREVDATE="$DATE"
+	DAY=$(echo "$DATE" | awk '{ print $1 }')
+	let "TOTAL = TOTAL + COUNT"
+	printf "%-8s %6d   %s" $REL $COUNT "$DAY"
+	if [ -n "$DAYS" ]
+	then
+		printf "%6d" $DAYS
+	fi
+	printf "\n"
+done
+
+echo "----------------------------------"
+printf "%-8s %6d\n" "Total:" $TOTAL
