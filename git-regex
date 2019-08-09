@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+USAGE="git regex [dir [dir [...]]] <pattern> <replace>"
+
+if [ "$#" -lt 2 ]
+then
+	echo "$USAGE"
+	exit 1
+fi
+
+while [ "$#" -gt 2 ]
+do
+	DIRS="$DIRS $1"
+	shift
+done
+
+git grep -El $1 $DIRS | xargs sed -i "s/$1/$2/g"
